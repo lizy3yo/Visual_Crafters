@@ -1,0 +1,148 @@
+.floatingIcon {
+  animation: floatIcon 5.5s ease-in-out infinite;
+}
+
+.floatingIconDelayed {
+  animation: floatIcon 6.5s ease-in-out infinite 0.9s;
+}
+
+@keyframes floatIcon {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.runway {
+  --speed: 22s;
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.runwayTrack {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  width: max-content;
+  /* start flush at the left edge */
+  margin-left: 0;
+  animation: runway var(--speed) linear infinite;
+  will-change: transform;
+}
+
+.runwayItem {
+  flex: 0 0 auto;
+  padding: 0.25rem;
+}
+
+/* pause on hover for accessibility */
+.runway:hover .runwayTrack {
+  animation-play-state: paused;
+}
+
+@keyframes runway {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* translate exactly half — the second copy snaps back to start position */
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Our Services Section ── */
+.servicesSection {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a2fd4 0%, #1a6fd4 55%, #4ab8e8 100%);
+  padding: 5rem 0 6rem;
+}
+
+/* Isometric 3-D diamond shapes — top-right corner accent */
+.diamondGroup {
+  position: absolute;
+  top: -40px;
+  right: -60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.diamond {
+  position: absolute;
+  border-radius: 6px;
+  transform: rotate(45deg);
+  opacity: 0.55;
+}
+
+.diamondLg {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #5bc8f5 0%, #2a7fd4 100%);
+  top: 0;
+  right: 0;
+}
+
+.diamondMd {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #3ab0e8 0%, #1a5fc4 100%);
+  top: 60px;
+  right: 120px;
+}
+
+.diamondSm {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #6dd4f8 0%, #2a90e0 100%);
+  top: 140px;
+  right: 40px;
+}
+
+/* Service card */
+.serviceCard {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 4rem 2.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(15, 29, 137, 0.18);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.serviceCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(15, 29, 137, 0.26);
+}
+
+.serviceCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16rem;
+  width: 100%;
+}
+
+/* Gradient divider line matching the reference */
+.serviceCardDivider {
+  margin-top: 1.5rem;
+  height: 2px;
+  width: 60%;
+  background: linear-gradient(90deg, #6b7ff5 0%, #35b8e7 100%);
+  border-radius: 2px;
+}
+
+.serviceCardTitle {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e2743;
+  line-height: 1.4;
+}
