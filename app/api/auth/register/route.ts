@@ -41,6 +41,14 @@ export async function POST  (request: NextRequest) {
             );
         }
 
+        // Validate that the role is one of the allowed values
+        if (!['admin', 'student'].includes(userRole)) {
+            return NextResponse.json(
+                { error: 'Invalid role specified.' },
+                { status: 400 }
+            );
+        }
+
         // Additional validation for student-specific fields
         if (userRole === 'student') {
             if (!year_level || !block || agreement !== true) {

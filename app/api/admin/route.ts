@@ -1,4 +1,4 @@
-import { connection, NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
@@ -10,10 +10,10 @@ export async function GET (request: NextRequest) {
         // Authenticate the user making the request
         const user = await authenticate(request);
 
-        // Authorize the user to ensure they have the 'superadmin' role
-        if (!authorizeRole(user, ['superadmin'])) {
+        // Authorize the user to ensure they have the 'admin' role
+        if (!authorizeRole(user, ['admin'])) {
             return NextResponse.json(
-                {error: 'Access denied. Superadmins only.'},
+                {error: 'Access denied. Admins only.'},
                 {status: 403}
             );
         }
@@ -26,7 +26,7 @@ export async function GET (request: NextRequest) {
 
         // Return a welcome message along with the user's information and some system statistics
         return NextResponse.json({
-            message: 'Welcome, superadmin!',
+            message: 'Welcome, admin!',
             users: {
                 id: user!.userId,
                 email: user!.email,
@@ -39,8 +39,7 @@ export async function GET (request: NextRequest) {
                 users: allUsers,
                 systemStats: {
                    students: allUsers.filter(u => u.role === 'student').length,
-                   instructors: allUsers.filter(u => u.role === 'instructor').length,
-                   custodians: allUsers.filter(u => u.role === 'custodian').length,
+                   admins: allUsers.filter(u => u.role === 'admin').length,
             },
             }
         });

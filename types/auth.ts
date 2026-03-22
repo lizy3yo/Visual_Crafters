@@ -4,7 +4,7 @@ import { UserRole } from './index';
 export interface LoginFormData {
   email: string;
   password: string;
-  role: UserRole; // required role selector (not optional)
+  role?: UserRole;
 }
 
 export interface RegisterFormData {
@@ -31,7 +31,7 @@ export interface AuthResponse {
   };
   accessToken: string;
   refreshToken: string;
-  expiresIn: string;
+  expiresIn: { accessTokenExpiresIn: string; refreshTokenExpiresIn: string };
 }
 
 export interface AuthError {

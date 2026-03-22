@@ -132,10 +132,7 @@ export default function RegisterForm() {
       setFormState({ isLoading: false, error: null, success: true });
 
       // Redirect based on role
-      const redirectPath = formData.role === 'superadmin'
-        ? '/superadmin'
-        : `/${formData.role}`;
-      
+      const redirectPath = formData.role === 'admin' ? '/admin' : '/student';
       router.push(redirectPath);
 
     } catch (error) {
@@ -157,11 +154,11 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Role Selector - excluding superadmin from registration */}
+      {/* Role Selector - only students can self-register */}
       <RoleSelector
         selectedRole={formData.role}
         onRoleChange={handleRoleChange}
-        excludeRoles={['superadmin']}
+        excludeRoles={['admin']}
       />
 
       {/* Name Fields (Grid Layout) */}

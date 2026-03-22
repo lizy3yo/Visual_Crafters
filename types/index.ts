@@ -1,4 +1,4 @@
-export type UserRole = 'superadmin' | 'instructor' | 'custodian' | 'student';
+export type UserRole = 'admin' | 'student';
 
 // This interface represents the structure of a user document in the database, including all relevant fields such as email, password, role, and timestamps for creation and updates
 export interface IUser {
