@@ -11,9 +11,7 @@ interface RoleSelectorProps {
 
 const ROLE_SHORTCUTS: Record<string, UserRole> = {
   's': 'student',
-  'i': 'instructor',
-  'c': 'custodian',
-  'a': 'superadmin',
+  'a': 'admin',
 };
 
 export default function RoleSelector({
@@ -43,10 +41,8 @@ export default function RoleSelector({
   }, [onRoleChange, excludeRoles]);
 
   const roles: { value: UserRole; label: string; shortcut: string; color: string }[] = [
-    { value: 'student' as UserRole, label: 'Student', shortcut: 'S', color: 'bg-blue-500' },
-    { value: 'instructor' as UserRole, label: 'Instructor', shortcut: 'I', color: 'bg-green-500' },
-    { value: 'custodian' as UserRole, label: 'Custodian', shortcut: 'C', color: 'bg-purple-500' },
-    { value: 'superadmin' as UserRole, label: 'Super Admin', shortcut: 'A', color: 'bg-red-500' },
+    { value: 'student', label: 'Student', shortcut: 'S', color: 'bg-blue-500' },
+    { value: 'admin', label: 'Admin', shortcut: 'A', color: 'bg-red-500' },
   ].filter(role => !excludeRoles.includes(role.value));
 
   return (

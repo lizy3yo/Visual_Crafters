@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { buffer } from "stream/consumers";
 
 // Extend the global namespace to include our mongoose connection
 declare global {

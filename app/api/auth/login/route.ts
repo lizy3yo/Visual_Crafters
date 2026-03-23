@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';;
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import RefreshToken from '@/lib/models/RefreshToken';
@@ -11,8 +11,7 @@ import {
  } from '@/lib/auth/jwt';
 import { UserResponse } from '@/types';
 import { rateLimit } from '@/lib/rateLimit/middleware';
-import { error } from 'console';
-import { access } from 'fs';
+
 
 // This API route handles user login. It validates the input, checks the user's credentials, and returns a JWT token along with the user information (excluding the password) upon successful authentication.
 export async function POST(request: NextRequest) {
@@ -97,11 +96,15 @@ export async function POST(request: NextRequest) {
         });        
     
     // Catch and handle any errors that occur during the login process
-    } catch (error:any){
-        console.error('Error during login:', error);
+    } catch (error: any) {
+        console.error('[Login] Unhandled error:', {
+            message: error?.message,
+            stack: error?.stack,
+            name: error?.name,
+        });
         return NextResponse.json(
-            {error: 'An error occurred during login.'},
-            {status: 500}
+            { error: 'An error occurred during login.' },
+            { status: 500 }
         );
     }
 }

@@ -66,14 +66,15 @@ export async function checkRateLimit(
         };
         
     } catch (error) {
-        console.error('Error checking rate limit:', error);
+        console.error('[RateLimit] Redis error — failing open:', error);
 
+        // Fail open: never block a request due to a Redis outage
         return {
-            allowed: true, // Fail open on error
+            allowed: true,
             limit: config.maxRequests,
             remaining: config.maxRequests,
             resetTime: new Date(now + config.windowMs),
-        }
+        };
     }
 }
 
