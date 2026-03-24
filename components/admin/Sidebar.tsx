@@ -29,9 +29,8 @@ export default function Sidebar({ collapsed, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
 
-  function handleLogout() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     router.replace('/auth/login');
   }
 

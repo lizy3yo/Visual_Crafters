@@ -3,12 +3,13 @@ import { connectDB } from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { hashPassword } from '@/lib/auth/password';
 import RefreshToken from '@/lib/models/RefreshToken';
-import { 
+import {
     createAccessToken,
     createRefreshToken,
     getTokenExpiry,
     getRefreshTokenExpiry
  } from '@/lib/auth/jwt';
+import { setAuthCookies } from '@/lib/auth/cookies';
 import { UserRole, UserResponse } from '@/types';
 import { error } from 'console';
 import { rateLimit } from '@/lib/rateLimit/middleware';
@@ -171,16 +172,19 @@ export async function POST  (request: NextRequest) {
         };
 
         // Return a success response with the user information and JWT token
-        return NextResponse.json(
+        const res = NextResponse.json(
             {
                 message: 'User created successfully.',
                 user: userResponse,
-                accessToken,
-                refreshToken: refreshTokenString,
                 expiresIn: expiry
             },
             {status: 201}
         );
+
+        // Set HttpOnly cookies — tokens never exposed to JS
+        setAuthCookies(res, accessToken, refreshTokenString);
+
+        return res;
 
     // Catch and handle any errors that occur during the registration process
     } catch (error:any) {

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
+import { ToastProvider } from '@/components/ui/Toast';
+import { ConfirmProvider } from '@/components/ui/ConfirmModal';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,20 +14,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) { router.replace('/auth/login'); return; }
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.role !== 'admin') { router.replace('/auth/login'); return; }
-      setAuthorized(true);
-    } catch {
-      router.replace('/auth/login');
-    }
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.user?.role === 'admin') {
+          setAuthorized(true);
+        } else {
+          router.replace('/auth/login');
+        }
+      })
+      .catch(() => router.replace('/auth/login'));
   }, [router]);
 
   if (!authorized) return null;
 
   return (
+    <ToastProvider>
+      <ConfirmProvider>
     <div className="flex h-screen bg-[#f1f5f9] overflow-hidden">
 
       {/* ── Mobile overlay ── */}
@@ -85,5 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
       </div>
     </div>
+    </ConfirmProvider>
+    </ToastProvider>
   );
 }

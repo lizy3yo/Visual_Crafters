@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginFormData, FormState } from '@/types/auth';
-import { loginUser, storeAuthTokens, AuthApiError } from '@/lib/api/auth';
+import { loginUser, AuthApiError } from '@/lib/api/auth';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -37,11 +37,6 @@ export default function LoginForm() {
 
     try {
       const response = await loginUser({ ...formData, role: 'student' });
-
-      storeAuthTokens({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      });
 
       setFormState({ isLoading: false, error: null, success: true });
 
