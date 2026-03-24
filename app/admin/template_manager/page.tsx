@@ -40,6 +40,40 @@ const STATUS_STYLES: Record<string, string> = {
   draft:     'text-gray-400',
 };
 
+// Image Lightbox
+function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close lightbox"
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+      >
+        <X size={20} />
+      </button>
+      <div
+        className="rounded-xl overflow-hidden shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="block max-w-[90vw] max-h-[90vh] w-auto h-auto rounded-xl"
+        />
+      </div>
+    </div>
+  );
+}
+
 // Template Card
 function TemplateCard({
   template, onEdit, onDelete,
@@ -48,41 +82,51 @@ function TemplateCard({
   onEdit:   (t: Template) => void;
   onDelete: (t: Template) => void;
 }) {
+  const [lightbox, setLightbox] = useState(false);
+
   return (
-    <div className="group rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-      <div className="relative w-full aspect-4/3 bg-gray-100 overflow-hidden">
-        <Image
-          src={template.imageUrl}
-          alt={template.title}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          unoptimized
-        />
-      </div>
-      <div className="flex flex-col gap-3 p-4">
-        <div>
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{template.category}</p>
-          <h3 className="text-sm font-semibold text-gray-800 leading-snug">{template.title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{template.description}</p>
-          <p className="text-sm font-bold text-sky-600 mt-1.5">&#8369;{template.price.toLocaleString()}</p>
+    <>
+      {lightbox && (
+        <ImageLightbox src={template.imageUrl} alt={template.title} onClose={() => setLightbox(false)} />
+      )}
+      <div className="group rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        <div
+          className="relative w-full aspect-4/3 bg-gray-100 overflow-hidden cursor-zoom-in"
+          onClick={() => setLightbox(true)}
+        >
+          <Image
+            src={template.imageUrl}
+            alt={template.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized
+          />
         </div>
-        <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <button aria-label="Edit template" onClick={() => onEdit(template)} className="p-1.5 rounded-md text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors">
-              <Pencil size={14} />
-            </button>
-            <button aria-label="Delete template" onClick={() => onDelete(template)} className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-              <Trash2 size={14} />
-            </button>
+        <div className="flex flex-col gap-3 p-4">
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">{template.category}</p>
+            <h3 className="text-sm font-semibold text-gray-800 leading-snug">{template.title}</h3>
+            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{template.description}</p>
+            <p className="text-sm font-bold text-sky-600 mt-1.5">&#8369;{template.price.toLocaleString()}</p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_STYLES[template.status]}`}>
-            <Eye size={12} />
-            {template.status === 'published' ? 'Published' : 'Draft'}
-          </span>
+          <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <button aria-label="Edit template" onClick={() => onEdit(template)} className="p-1.5 rounded-md text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors">
+                <Pencil size={14} />
+              </button>
+              <button aria-label="Delete template" onClick={() => onDelete(template)} className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_STYLES[template.status]}`}>
+              <Eye size={12} />
+              {template.status === 'published' ? 'Published' : 'Draft'}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
