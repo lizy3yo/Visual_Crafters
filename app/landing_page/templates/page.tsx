@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Search, X, Eye, ShoppingCart } from 'lucide-react';
 import BrandHeader from '../_components/BrandHeader';
 import BrandFooter from '../_components/BrandFooter';
+import IconRunway from '../_components/IconRunway';
 
 interface Template {
   _id: string;
@@ -199,22 +200,27 @@ export default function TemplatesPage() {
   const displayed = templates;
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] text-[#1b243b]">
+    <div className="min-h-screen bg-white text-[#1b243b]">
       <BrandHeader />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-
-        {/* Hero */}
-        <div className="text-center mb-12">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-white">
+        <div className="absolute inset-x-0 top-2 pointer-events-none">
+          <IconRunway />
+        </div>
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-extrabold text-[#1b243b] sm:text-5xl">
             Design{' '}
-            <span className="text-blue-600">Showcase</span>
+            <span className="text-[#1f4db8]">Showcase</span>
           </h1>
-          <p className="mt-4 text-base text-gray-500 max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base text-[#4a5475] max-w-xl mx-auto leading-relaxed">
             Browse our portfolio of sample works and ready-made templates.
             Find the perfect design for your project.
           </p>
         </div>
+      </section>
+
+      <main className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
 
         {/* Search */}
         <div className="relative max-w-lg mx-auto mb-8">
