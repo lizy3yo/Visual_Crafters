@@ -200,7 +200,7 @@ export default function TemplatesPage() {
   const displayed = templates;
 
   return (
-    <div className="min-h-screen bg-white text-[#1b243b]">
+    <div className="min-h-screen bg-white text-[#1b243b] flex flex-col">
       <BrandHeader />
 
       {/* Hero */}
@@ -220,7 +220,7 @@ export default function TemplatesPage() {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
 
         {/* Search */}
         <div className="relative max-w-lg mx-auto mb-8">
