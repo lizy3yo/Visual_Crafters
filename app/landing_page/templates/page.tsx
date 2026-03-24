@@ -203,89 +203,91 @@ export default function TemplatesPage() {
     <div className="min-h-screen bg-white text-[#1b243b] flex flex-col">
       <BrandHeader />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-x-0 top-2 pointer-events-none">
-          <IconRunway />
-        </div>
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-extrabold text-[#1b243b] sm:text-5xl">
-            Design{' '}
-            <span className="text-[#1f4db8]">Showcase</span>
-          </h1>
-          <p className="mt-4 text-base text-[#4a5475] max-w-xl mx-auto leading-relaxed">
-            Browse our portfolio of sample works and ready-made templates.
-            Find the perfect design for your project.
-          </p>
-        </div>
-      </section>
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {/* Hero + Search + Filters — unified block */}
+        <div className="relative overflow-hidden text-center pt-14 pb-8">
+          <div className="absolute inset-x-0 top-2 pointer-events-none">
+            <IconRunway />
+          </div>
+          <div className="relative z-10">
+            <h1 className="text-4xl font-extrabold text-[#1b243b] sm:text-5xl">
+              Design{' '}
+              <span className="text-[#1f4db8]">Showcase</span>
+            </h1>
+            <p className="mt-3 text-base text-[#4a5475] max-w-xl mx-auto leading-relaxed">
+              Browse our portfolio of sample works and ready-made templates.
+              Find the perfect design for your project.
+            </p>
 
-        {/* Search */}
-        <div className="relative max-w-lg mx-auto mb-8">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => handleSearch(e.target.value)}
-            placeholder="Search by keyword..."
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
-          />
-          {search && (
-            <button
-              onClick={() => handleSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              aria-label="Clear search"
-            >
-              <X size={15} />
-            </button>
-          )}
-        </div>
+            {/* Search */}
+            <div className="relative max-w-lg mx-auto mt-6">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => handleSearch(e.target.value)}
+                placeholder="Search by keyword..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+              />
+              {search && (
+                <button
+                  onClick={() => handleSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search"
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
 
-        {/* Category filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {['all', ...categories].map(cat => (
-            <button
-              key={cat}
-              onClick={() => handleFilter(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
-                activeFilter === cat
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
-              }`}
-            >
-              {cat === 'all' ? 'All' : cat}
-            </button>
-          ))}
+            {/* Category filters */}
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              {['all', ...categories].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => handleFilter(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                    activeFilter === cat
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+                >
+                  {cat === 'all' ? 'All' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-          </div>
-        ) : displayed.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-50 mb-5">
-              <LayoutTemplate size={36} className="text-blue-300" />
+        <div className="pb-16">
+          {loading ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
-            <h3 className="text-base font-semibold text-[#1b243b] mb-1">
-              {search ? 'No results found' : 'No templates yet'}
-            </h3>
-            <p className="text-sm text-gray-400 max-w-xs">
-              {search
-                ? `We couldn't find any templates matching "${search}". Try a different keyword.`
-                : 'Check back soon — new designs are on the way.'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {displayed.map(t => (
-              <TemplateCard key={t._id} template={t} />
-            ))}
-          </div>
-        )}
+          ) : displayed.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-50 mb-5">
+                <LayoutTemplate size={36} className="text-blue-300" />
+              </div>
+              <h3 className="text-base font-semibold text-[#1b243b] mb-1">
+                {search ? 'No results found' : 'No templates yet'}
+              </h3>
+              <p className="text-sm text-gray-400 max-w-xs">
+                {search
+                  ? `We couldn't find any templates matching "${search}". Try a different keyword.`
+                  : 'Check back soon — new designs are on the way.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {displayed.map(t => (
+                <TemplateCard key={t._id} template={t} />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       <BrandFooter />
