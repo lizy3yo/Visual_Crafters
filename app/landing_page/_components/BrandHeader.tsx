@@ -18,7 +18,7 @@ export default function BrandHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#e6eefb] bg-white/95 backdrop-blur-sm shadow-sm">
-      <div className="relative mx-auto flex h-[4.5rem] w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-18 w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <div className="relative flex w-full items-center">
           <div className="flex items-center">
             <Link href="/landing_page" className="flex items-center gap-3">
