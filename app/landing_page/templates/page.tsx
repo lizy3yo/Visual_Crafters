@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { Search, X, Eye, ShoppingCart } from 'lucide-react';
+import { Search, X, Eye, ShoppingCart, LayoutTemplate } from 'lucide-react';
 import BrandHeader from '../_components/BrandHeader';
 import BrandFooter from '../_components/BrandFooter';
 import IconRunway from '../_components/IconRunway';
@@ -266,9 +266,17 @@ export default function TemplatesPage() {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : displayed.length === 0 ? (
-          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-16 text-center">
-            <p className="text-sm text-gray-400">
-              {search ? `No templates found for "${search}".` : 'No templates available yet.'}
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-50 mb-5">
+              <LayoutTemplate size={36} className="text-blue-300" />
+            </div>
+            <h3 className="text-base font-semibold text-[#1b243b] mb-1">
+              {search ? 'No results found' : 'No templates yet'}
+            </h3>
+            <p className="text-sm text-gray-400 max-w-xs">
+              {search
+                ? `We couldn't find any templates matching "${search}". Try a different keyword.`
+                : 'Check back soon — new designs are on the way.'}
             </p>
           </div>
         ) : (
