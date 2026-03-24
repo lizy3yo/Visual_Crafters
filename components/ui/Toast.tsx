@@ -51,7 +51,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
 
       {/* Toast stack */}
-      <div className="fixed bottom-5 right-5 z-100 flex flex-col gap-2 w-80 max-w-[calc(100vw-2.5rem)]">
+      <div className="fixed top-5 right-5 z-[100] flex flex-col gap-2 w-80 max-w-[calc(100vw-2.5rem)]">
         {toasts.map(({ id, type, message }) => {
           const { icon: Icon, bar, icon_cls } = CONFIG[type];
           return (
