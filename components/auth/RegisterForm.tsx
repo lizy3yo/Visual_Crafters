@@ -10,7 +10,7 @@ import {
   validatePassword,
   validateName,
 } from '@/lib/utils/validators';
-import { registerUser, storeAuthTokens, AuthApiError } from '@/lib/api/auth';
+import { registerUser, AuthApiError } from '@/lib/api/auth';
 import RoleSelector from './RoleSelector';
 
 export default function RegisterForm() {
@@ -124,14 +124,8 @@ export default function RegisterForm() {
     try {
       const response = await registerUser(formData);
 
-      storeAuthTokens({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      });
-
       setFormState({ isLoading: false, error: null, success: true });
 
-      // Redirect based on role
       const redirectPath = formData.role === 'admin' ? '/admin' : '/student';
       router.push(redirectPath);
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "Services", href: "/landing_page/services" },
@@ -13,10 +14,11 @@ const navItems = [
 
 export default function BrandHeader() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#e6eefb] bg-white/95 backdrop-blur-sm shadow-sm">
-      <div className="relative mx-auto flex h-[4.5rem] w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-18 w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <div className="relative flex w-full items-center">
           <div className="flex items-center">
             <Link href="/landing_page" className="flex items-center gap-3">
@@ -37,16 +39,24 @@ export default function BrandHeader() {
           <div className="ml-auto flex items-center gap-7">
             <nav className="hidden md:block">
               <ul className="flex items-center gap-7">
-                {navItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm font-medium text-[#222834] transition-colors hover:text-[#1f4db8]"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`relative text-sm font-medium transition-colors pb-0.5
+                          after:absolute after:bottom-0 after:left-0 after:h-[2px] after:rounded-full after:bg-[#1f4db8] after:transition-all after:duration-200
+                          ${isActive
+                            ? 'text-[#1f4db8] after:w-full'
+                            : 'text-[#222834] after:w-0 hover:text-[#1f4db8] hover:after:w-full'
+                          }`}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
 
@@ -86,17 +96,24 @@ export default function BrandHeader() {
         {open && (
           <div className="absolute left-0 top-full w-full bg-white/95 px-4 py-4 shadow-md md:hidden">
             <ul className="space-y-3">
-              {navItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-md px-3 py-2 text-base font-medium text-[#1b243b] hover:bg-[#f1f5fb]"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`block rounded-md px-3 py-2 text-base font-medium transition-colors ${
+                        isActive
+                          ? 'text-[#1f4db8] bg-[#eef3fc]'
+                          : 'text-[#1b243b] hover:bg-[#f1f5fb]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
               <li>
                 <Link
                   href="/auth/login"

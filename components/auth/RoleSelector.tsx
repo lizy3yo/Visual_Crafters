@@ -40,10 +40,12 @@ export default function RoleSelector({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [onRoleChange, excludeRoles]);
 
-  const roles: { value: UserRole; label: string; shortcut: string; color: string }[] = [
-    { value: 'student', label: 'Student', shortcut: 'S', color: 'bg-blue-500' },
-    { value: 'admin', label: 'Admin', shortcut: 'A', color: 'bg-red-500' },
-  ].filter(role => !excludeRoles.includes(role.value));
+  const roles: { value: UserRole; label: string; shortcut: string; color: string }[] = (
+    [
+      { value: 'student' as UserRole, label: 'Student', shortcut: 'S', color: 'bg-blue-500' },
+      { value: 'admin'   as UserRole, label: 'Admin',   shortcut: 'A', color: 'bg-red-500'  },
+    ] satisfies { value: UserRole; label: string; shortcut: string; color: string }[]
+  ).filter(role => !excludeRoles.includes(role.value));
 
   return (
     <div className="space-y-3">

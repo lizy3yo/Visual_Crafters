@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginFormData, FormState } from '@/types/auth';
-import { loginUser, storeAuthTokens, AuthApiError } from '@/lib/api/auth';
+import { loginUser, AuthApiError } from '@/lib/api/auth';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -37,11 +37,6 @@ export default function LoginForm() {
 
     try {
       const response = await loginUser({ ...formData, role: 'student' });
-
-      storeAuthTokens({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      });
 
       setFormState({ isLoading: false, error: null, success: true });
 
@@ -118,7 +113,7 @@ export default function LoginForm() {
       {/* Error */}
       {formState.error && (
         <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 flex-shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
           <p className="text-sm text-red-700">{formState.error}</p>
