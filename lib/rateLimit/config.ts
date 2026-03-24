@@ -37,6 +37,11 @@ export const RATE_LIMIT_RULES: RateLimitRules = {
         maxRequests: 200,
         message: 'Too many admin requests, please try again after 1 minute.',
     },
+    'client-request:submit': {
+        windowMs: 10 * 60 * 1000, // 10 minutes
+        maxRequests: 5,
+        message: 'Too many requests submitted. Please wait 10 minutes before trying again.',
+    },
 };
 
 export function getRateLimitConfig(ruleName: string) {

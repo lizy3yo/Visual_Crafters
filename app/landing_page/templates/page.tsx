@@ -6,6 +6,7 @@ import { Search, X, Eye, ShoppingCart, LayoutTemplate } from 'lucide-react';
 import BrandHeader from '../_components/BrandHeader';
 import BrandFooter from '../_components/BrandFooter';
 import IconRunway from '../_components/IconRunway';
+import BuyRequestModal from '@/components/landing/BuyRequestModal';
 
 interface Template {
   _id: string;
@@ -68,7 +69,7 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
 }
 
 // Template card
-function TemplateCard({ template }: { template: Template }) {
+function TemplateCard({ template, onBuy }: { template: Template; onBuy: (t: Template) => void }) {
   const [lightbox, setLightbox] = useState(false);
 
   return (
@@ -110,7 +111,9 @@ function TemplateCard({ template }: { template: Template }) {
                 <Eye size={13} />
                 View
               </button>
-              <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors">
+              <button
+                onClick={() => onBuy(template)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors">
                 <ShoppingCart size={13} />
                 Buy
               </button>
@@ -128,6 +131,7 @@ export default function TemplatesPage() {
   const [activeFilter, setFilter]     = useState('all');
   const [search, setSearch]           = useState('');
   const [loading, setLoading]         = useState(true);
+  const [buyTarget, setBuyTarget]     = useState<Template | null>(null);
   const searchTimeout                 = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchTemplates = useCallback(async (category = 'all', q = '') => {
@@ -283,7 +287,7 @@ export default function TemplatesPage() {
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {displayed.map(t => (
-                <TemplateCard key={t._id} template={t} />
+                <TemplateCard key={t._id} template={t} onBuy={setBuyTarget} />
               ))}
             </div>
           )}
@@ -291,6 +295,14 @@ export default function TemplatesPage() {
       </main>
 
       <BrandFooter />
+
+      {/* Buy Request Modal */}
+      {buyTarget && (
+        <BuyRequestModal
+          template={buyTarget}
+          onClose={() => setBuyTarget(null)}
+        />
+      )}
     </div>
   );
 }
