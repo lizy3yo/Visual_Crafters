@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginFormData, FormState } from '@/types/auth';
 import { loginUser, AuthApiError } from '@/lib/api/auth';
+import { useToast } from '@/components/ui/Toast';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -26,6 +27,20 @@ export default function LoginForm() {
       }
     } catch (_) {}
   }, []);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('vc:post_logout_message');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.message) {
+        toast(parsed.message, parsed.type ?? 'info');
+        sessionStorage.removeItem('vc:post_logout_message');
+      }
+    } catch (_) {}
+  }, [toast]);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -67,6 +82,9 @@ export default function LoginForm() {
       } catch (_) {}
 
       const redirectPath = response.user.role === 'admin' ? '/admin' : '/student';
+      try {
+        sessionStorage.setItem('vc:post_login_message', JSON.stringify({ message: 'Signed in successfully.', type: 'success' }));
+      } catch (_) {}
       router.push(redirectPath);
     } catch (error) {
       setFormState({

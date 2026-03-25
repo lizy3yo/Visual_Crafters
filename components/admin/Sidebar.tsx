@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -11,6 +12,9 @@ import {
   Receipt,
   LogOut,
 } from 'lucide-react';
+import { useConfirm } from '@/components/ui/ConfirmModal';
+import { useToast } from '@/components/ui/Toast';
+import { logoutUser } from '@/lib/api/auth';
 
 const NAV_ITEMS = [
   { label: 'Dashboard',         href: '/admin/dashboard',        icon: LayoutDashboard },
@@ -28,10 +32,31 @@ interface SidebarProps {
 export default function Sidebar({ collapsed, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
-
+  const { confirm } = useConfirm();
+  const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    router.replace('/auth/login');
+    const ok = await confirm({
+      title: 'Sign out?',
+      description: 'You will be signed out and returned to the login screen.',
+      confirmLabel: 'Sign out',
+      danger: true,
+    });
+    if (!ok) return;
+
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+      // Persist a small post-logout message so the login page can show the success toast
+      // after the redirect (avoids waiting inside the admin UI).
+      try { sessionStorage.setItem('vc:post_logout_message', JSON.stringify({ message: 'Signed out successfully.', type: 'success' })); } catch {}
+      router.replace('/auth/login');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to sign out.';
+      toast(msg, 'error');
+    } finally {
+      setIsLoggingOut(false);
+    }
   }
 
   function handleNavClick() {
@@ -111,14 +136,16 @@ export default function Sidebar({ collapsed, onCloseMobile }: SidebarProps) {
         <button
           onClick={handleLogout}
           title={collapsed ? 'Sign Out' : undefined}
+          disabled={isLoggingOut}
+          aria-busy={isLoggingOut}
           className={`
             flex w-full items-center rounded-lg py-2.5 text-sm font-medium
-            text-[#6b7280] transition-colors hover:bg-red-500/10 hover:text-red-400
+            text-[#6b7280] transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-60 disabled:cursor-not-allowed
             ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'}
           `}
         >
           <LogOut size={17} className="shrink-0" />
-          {!collapsed && 'Sign Out'}
+          {!collapsed && (isLoggingOut ? 'Signing out…' : 'Sign Out')}
         </button>
       </div>
     </aside>
