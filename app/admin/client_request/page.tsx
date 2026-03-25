@@ -149,6 +149,7 @@ export default function ClientRequestsPage() {
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [selected, setSelected] = useState<ClientRequest | null>(null);
+  const [statusFilter, setStatusFilter] = useState('all' as 'all' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled');
 
   const fetchRequests = useCallback(async () => {
     try {
@@ -223,6 +224,17 @@ export default function ClientRequestsPage() {
       </div>
 
       <div className="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-5 py-3">
+          <div className="mb-3 flex items-center gap-3">
+            {(['all','Pending','In Progress','Completed','Cancelled'] as const).map(s => (
+              <button key={s}
+                onClick={() => setStatusFilter(s as any)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${statusFilter === s ? 'bg-sky-500 text-white' : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'}`}>
+                {s === 'all' ? 'All' : s}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -258,7 +270,11 @@ export default function ClientRequestsPage() {
                   </td>
                 </tr>
               ) : (
-                requests.map(row => (
+                requests
+                  .slice()
+                  .filter(r => statusFilter === 'all' ? true : r.status === statusFilter)
+                  .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+                  .map(row => (
                   <tr key={row._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4 font-medium text-gray-800 whitespace-nowrap">{row.fullName}</td>
                     <td className="px-5 py-4 text-gray-600 whitespace-nowrap">{row.service}</td>
