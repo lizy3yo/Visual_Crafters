@@ -239,6 +239,7 @@ export default function BuyRequestModal({ template, onClose }: Props) {
                   type="date"
                   value={form.deadline}
                   onChange={e => set('deadline', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
                   className={`w-full rounded-lg border px-3 py-2.5 text-sm bg-gray-50 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1f4db8] focus:border-transparent transition ${errors.deadline ? 'border-red-400' : 'border-gray-200'}`}
                 />
                 {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}
