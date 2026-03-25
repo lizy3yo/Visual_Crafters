@@ -769,11 +769,7 @@ export default function ReservationsPage() {
           <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Reservations &amp; Queue</h1>
           <p className="mt-0.5 text-sm text-gray-500">View scheduled appointments and the current service queue.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowRequestsModal(true)} className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-white border text-sm font-medium hover:bg-gray-50">
-            Requests
-          </button>
-        </div>
+        
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
