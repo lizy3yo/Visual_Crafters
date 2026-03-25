@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Eye, Clock, X, FileText } from 'lucide-react';
+import { Eye, Clock, X, FileText, InboxIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmModal';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ClientRequest {
@@ -143,7 +144,8 @@ function ViewModal({ request, onClose, onStatusChange }: {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function ClientRequestsPage() {
-  const { toast } = useToast();
+  const { toast }   = useToast();
+  const { confirm } = useConfirm();
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [selected, setSelected] = useState<ClientRequest | null>(null);
@@ -184,6 +186,14 @@ export default function ClientRequestsPage() {
   }, [fetchRequests, toast]);
 
   async function handleStatusChange(id: string, status: string) {
+    const ok = await confirm({
+      title:        `Set status to "${status}"?`,
+      description:  'This will update the request status and notify the team.',
+      confirmLabel: 'Update',
+      danger:       status === 'Cancelled',
+    });
+    if (!ok) return;
+
     try {
       const res  = await fetch('/api/client-requests', {
         method:      'PATCH',
@@ -193,6 +203,12 @@ export default function ClientRequestsPage() {
       });
       const data = await res.json();
       if (!res.ok) { toast(data.error ?? 'Failed to update status.', 'error'); return; }
+
+      // Update state immediately from response — don't wait for SSE
+      const updated: ClientRequest = data.request;
+      setRequests(prev => prev.map(x => x._id === updated._id ? updated : x));
+      setSelected(prev => prev?._id === updated._id ? updated : prev);
+
       toast(`Status updated to "${status}".`, 'success');
     } catch {
       toast('Something went wrong.', 'error');
@@ -231,8 +247,14 @@ export default function ClientRequestsPage() {
                 ))
               ) : requests.length === 0 ? (
                 <tr>
-                  <td colSpan={COLUMNS.length} className="px-5 py-12 text-center text-sm text-gray-400">
-                    No requests yet.
+                  <td colSpan={COLUMNS.length} className="px-5 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100">
+                        <InboxIcon size={22} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">No requests yet</p>
+                      <p className="text-xs text-gray-400">Client requests will appear here once submitted.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (

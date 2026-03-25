@@ -7,6 +7,7 @@ import { uploadImage } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rateLimit/middleware';
 import { sendEmail } from '@/lib/email/nodemailer';
 import { getRequestConfirmationTemplate } from '@/lib/email/templates/requestConfirmation';
+import { getRequestStatusUpdateTemplate } from '@/lib/email/templates/requestStatusUpdate';
 
 // ── Validation helpers ────────────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -128,6 +129,23 @@ export async function PATCH(req: NextRequest) {
     if (!doc) return NextResponse.json({ error: 'Request not found.' }, { status: 404 });
 
     broadcast('request:updated', doc);
+
+    // Send status notification email (non-blocking)
+    const notifyStatuses = ['In Progress', 'Completed', 'Cancelled'] as const;
+    if (notifyStatuses.includes(status as any)) {
+      const referenceNumber = String(doc._id).slice(-8).toUpperCase();
+      const { html, text, subject } = getRequestStatusUpdateTemplate({
+        fullName:       (doc as any).fullName,
+        service:        (doc as any).service,
+        templateTitle:  (doc as any).templateTitle,
+        deadline:       (doc as any).deadline,
+        referenceNumber,
+        status: status as 'In Progress' | 'Completed' | 'Cancelled',
+      });
+      sendEmail((doc as any).email, subject, html, text)
+        .catch(err => console.error('[StatusUpdate email]', err));
+    }
+
     return NextResponse.json({ request: doc });
   } catch (err: any) {
     console.error('[ClientRequest PATCH]', err);
