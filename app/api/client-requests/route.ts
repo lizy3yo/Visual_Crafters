@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import ClientRequest from '@/lib/models/ClientRequest';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { broadcast } from '@/lib/sse/clientRequestBroadcaster';
+import { redis, isUpstash } from '@/lib/rateLimit/redis';
 import { uploadImage } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rateLimit/middleware';
 import { sendEmail } from '@/lib/email/nodemailer';
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest) {
 
     broadcast('request:created', doc);
 
+    // Auto-creation of reservations was removed: client requests remain separate
+
     // Send confirmation email (non-blocking — don't fail the request if email fails)
     const referenceNumber = String(doc._id).slice(-8).toUpperCase();
     const { html, text } = getRequestConfirmationTemplate({
@@ -101,7 +104,33 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status');
     const query  = status && status !== 'all' ? { status } : {};
 
+    const cacheKey = status && status !== 'all' ? `client-requests:status:${status}` : 'client-requests:all';
+
+    // Try Redis cache first
+    try {
+      const cached = await redis.get?.(cacheKey) ?? null;
+      if (cached) {
+        const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached;
+        const res = NextResponse.json({ requests: parsed });
+        res.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
+        return res;
+      }
+    } catch (e) {
+      console.error('[ClientRequest GET] Redis read error', e);
+    }
+
     const requests = await ClientRequest.find(query).sort({ createdAt: -1 }).lean();
+
+    // Populate cache (short TTL)
+    try {
+      if (isUpstash()) {
+        await (redis as any).set(cacheKey, JSON.stringify(requests), { ex: 15 });
+      } else {
+        await (redis as any).set(cacheKey, JSON.stringify(requests), 'EX', 15);
+      }
+    } catch (e) {
+      console.error('[ClientRequest GET] Redis write error', e);
+    }
 
     const res = NextResponse.json({ requests });
     res.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
