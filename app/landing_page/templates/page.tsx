@@ -130,12 +130,11 @@ export default function TemplatesPage() {
   const [categories, setCategories]   = useState<string[]>([]);
   const [activeFilter, setFilter]     = useState('all');
   const [search, setSearch]           = useState('');
-  const [loading, setLoading]         = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const [buyTarget, setBuyTarget]     = useState<Template | null>(null);
   const searchTimeout                 = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchTemplates = useCallback(async (category = 'all', q = '') => {
-    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (category !== 'all') params.set('category', category);
@@ -146,14 +145,13 @@ export default function TemplatesPage() {
       if (res.ok) {
         const list: Template[] = data.templates ?? [];
         setTemplates(list);
-        // derive categories from full list only on initial load
         if (category === 'all' && !q) {
           const cats = Array.from(new Set(list.map(t => t.category))).sort();
           setCategories(cats);
         }
       }
     } catch { /* silent */ } finally {
-      setLoading(false);
+      setInitializing(false);
     }
   }, []);
 
@@ -266,7 +264,7 @@ export default function TemplatesPage() {
 
         {/* Grid */}
         <div className="pb-16">
-          {loading ? (
+          {initializing ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
