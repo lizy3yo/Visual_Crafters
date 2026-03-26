@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Transaction from '@/lib/models/Transaction';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { broadcast } from '@/lib/sse/transactionBroadcaster';
+import { broadcast as broadcastDashboard } from '@/lib/sse/dashboardBroadcaster';
 import { redis, isUpstash } from '@/lib/rateLimit/redis';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -165,7 +166,9 @@ export async function POST(req: NextRequest) {
     });
 
     await redisDel(CACHE_KEY_ALL, `${CACHE_KEY_ALL}:day`, `${CACHE_KEY_ALL}:week`, `${CACHE_KEY_ALL}:month`);
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
     broadcast('transaction:created', doc);
+    broadcastDashboard('dashboard:refresh', { reason: 'transaction:created' });
     return NextResponse.json({ transaction: doc }, { status: 201 });
   } catch (err: any) {
     console.error('[Transactions POST]', err);

@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import ClientRequest from '@/lib/models/ClientRequest';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { broadcast } from '@/lib/sse/clientRequestBroadcaster';
+import { broadcast as broadcastDashboard } from '@/lib/sse/dashboardBroadcaster';
 import { redis, isUpstash } from '@/lib/rateLimit/redis';
 import { uploadImage } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rateLimit/middleware';
@@ -63,6 +64,9 @@ export async function POST(req: NextRequest) {
     });
 
     broadcast('request:created', doc);
+    // Invalidate dashboard cache so stats update immediately
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
+    broadcastDashboard('dashboard:refresh', { reason: 'request:created' });
 
     // Auto-creation of reservations was removed: client requests remain separate
 
@@ -158,6 +162,9 @@ export async function PATCH(req: NextRequest) {
     if (!doc) return NextResponse.json({ error: 'Request not found.' }, { status: 404 });
 
     broadcast('request:updated', doc);
+    // Invalidate dashboard cache so stats update immediately
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
+    broadcastDashboard('dashboard:refresh', { reason: 'request:updated' });
 
     // Send status notification email (non-blocking)
     const notifyStatuses = ['In Progress', 'Completed', 'Cancelled'] as const;

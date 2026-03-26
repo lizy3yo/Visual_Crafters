@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Transaction from '@/lib/models/Transaction';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { broadcast } from '@/lib/sse/transactionBroadcaster';
+import { broadcast as broadcastDashboard } from '@/lib/sse/dashboardBroadcaster';
 import { redis, isUpstash } from '@/lib/rateLimit/redis';
 
 const CACHE_KEY_ALL = 'transactions:all';
@@ -69,7 +70,9 @@ export async function PATCH(
     if (!doc) return NextResponse.json({ error: 'Transaction not found.' }, { status: 404 });
 
     await redisDel(...CACHE_KEYS);
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
     broadcast('transaction:updated', doc);
+    broadcastDashboard('dashboard:refresh', { reason: 'transaction:updated' });
     return NextResponse.json({ transaction: doc });
   } catch (err: any) {
     console.error('[Transactions PATCH]', err);
@@ -95,7 +98,9 @@ export async function DELETE(
     if (!doc) return NextResponse.json({ error: 'Transaction not found.' }, { status: 404 });
 
     await redisDel(...CACHE_KEYS);
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
     broadcast('transaction:deleted', { id });
+    broadcastDashboard('dashboard:refresh', { reason: 'transaction:deleted' });
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error('[Transactions DELETE]', err);
