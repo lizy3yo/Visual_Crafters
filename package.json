@@ -1,5 +1,5 @@
 {
-  "name": "VisualCrafters",
+  "name": "visual-crafters",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,7 +17,7 @@
     "cloudinary": "^2.9.0",
     "ioredis": "^5.9.2",
     "jsonwebtoken": "^9.0.3",
-    "lucide-react": "^0.259.0",
+    "lucide-react": "^0.475.0",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.0",
     "next": "16.1.6",
