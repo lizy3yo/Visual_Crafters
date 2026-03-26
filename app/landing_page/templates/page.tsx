@@ -202,16 +202,18 @@ export default function TemplatesPage() {
   const displayed = templates;
 
   return (
-    <div className="min-h-screen bg-white text-[#1b243b] flex flex-col">
+    <div className="min-h-screen bg-white text-[#1b243b] flex flex-col relative">
       <BrandHeader />
+
+      {/* Full-bleed icon runway — must sit outside the constrained main */}
+      <div className="absolute inset-x-0 top-[5rem] sm:top-[5rem] pointer-events-none z-0">
+        <IconRunway />
+      </div>
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* Hero + Search + Filters — unified block */}
-        <div className="relative overflow-hidden text-center pt-14 pb-8">
-          <div className="absolute inset-x-0 top-2 pointer-events-none">
-            <IconRunway />
-          </div>
+        <div className="relative text-center pt-14 pb-8">
           <div className="relative z-10">
             <h1 className="text-4xl font-extrabold text-[#1b243b] sm:text-5xl">
               Design{' '}

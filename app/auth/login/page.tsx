@@ -46,15 +46,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-[#4a5475]">
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/auth/register"
-                className="font-semibold text-[#1f4db8] hover:text-[#0f1d89] transition-colors"
-              >
-                Sign up
-              </Link>
-            </p>
+
             <Link
               href="/auth/forgot-password"
               className="block text-sm text-[#1f4db8] hover:text-[#0f1d89] transition-colors"
