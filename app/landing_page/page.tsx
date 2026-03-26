@@ -49,9 +49,7 @@ export default function LandingPage() {
           <div className="w-full flex flex-col items-center justify-center px-6 py-20 text-center">
 
             <h1 className="mx-auto w-full max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-[#1f4db8]">
-              Elevate Your Brand With
-              <br />
-              Professional Design
+              Elevate Your Brand With Professional Design
             </h1>
             <p className="mt-6 mx-auto max-w-2xl text-base sm:text-lg leading-7 text-[#4a5475]">
               Branding and digital transformation. We create experiences that matter.           
