@@ -70,10 +70,10 @@ function IncomeChart({ data, year }: { data: IncomePoint[]; year: number }) {
   const chartW   = data.length * (BAR_W + GAP) - GAP;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto -mx-1">
       <svg
         viewBox={`0 0 ${chartW + 40} ${CHART_H + 40}`}
-        className="w-full min-w-[320px]"
+        className="w-full"
         aria-label="Income overview bar chart"
       >
         {/* Y-axis grid lines */}
@@ -122,7 +122,7 @@ function SkeletonChart() {
   const chartW  = HEIGHTS.length * (BAR_W + GAP) - GAP;
   return (
     <div className="overflow-x-auto animate-pulse">
-      <svg viewBox={`0 0 ${chartW + 40} ${CHART_H + 40}`} className="w-full min-w-[320px]">
+      <svg viewBox={`0 0 ${chartW + 40} ${CHART_H + 40}`} className="w-full">
         {HEIGHTS.map((h, i) => {
           const barH = h * CHART_H;
           const x    = 30 + i * (BAR_W + GAP);
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
 
       {/* Page heading */}
       <div>
@@ -242,19 +242,19 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Stat cards — 2-up on mobile, 2-up on sm, 4-up on xl */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         {STAT_CARDS.map(({ label, value, change, positive, icon: Icon, color }) => (
           <div
             key={label}
-            className="rounded-xl bg-white border border-gray-200 p-5 flex flex-col gap-4 shadow-sm"
+            className="rounded-xl bg-white border border-gray-200 p-3 sm:p-5 flex flex-col gap-3 sm:gap-4 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <div className={`rounded-lg p-2.5 ${color}`}>
-                <Icon size={18} />
+              <div className={`rounded-lg p-2 sm:p-2.5 ${color}`}>
+                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
               </div>
               {change !== null && (
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                <span className={`text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full ${
                   positive ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'
                 }`}>
                   {change}
@@ -263,10 +263,10 @@ export default function AdminDashboard() {
             </div>
             <div>
               {loading || value === null
-                ? <div className="h-7 w-20 rounded bg-gray-100 animate-pulse" />
-                : <p className="text-2xl font-bold text-gray-900">{value}</p>
+                ? <div className="h-6 sm:h-7 w-16 sm:w-20 rounded bg-gray-100 animate-pulse" />
+                : <p className="text-xl sm:text-2xl font-bold text-gray-900">{value}</p>
               }
-              <p className="mt-0.5 text-xs text-gray-500">{label}</p>
+              <p className="mt-0.5 text-[11px] sm:text-xs text-gray-500 leading-tight">{label}</p>
             </div>
           </div>
         ))}

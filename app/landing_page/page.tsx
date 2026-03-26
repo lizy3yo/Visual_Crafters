@@ -48,8 +48,8 @@ export default function LandingPage() {
 
           <div className="w-full flex flex-col items-center justify-center px-6 py-20 text-center">
 
-            <h1 className="mx-auto w-full max-w-4xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-[#1f4db8]">
-              <span className="whitespace-nowrap">Elevate Your Brand With</span>
+            <h1 className="mx-auto w-full max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-[#1f4db8]">
+              Elevate Your Brand With
               <br />
               Professional Design
             </h1>
@@ -82,7 +82,7 @@ export default function LandingPage() {
                     <img
                       src={card.icon}
                       alt={card.title}
-                      className="h-52 w-52 object-contain drop-shadow-md"
+                      className="h-32 w-32 sm:h-44 sm:w-44 lg:h-52 lg:w-52 object-contain drop-shadow-md"
                     />
                   </div>
                   <div className={styles.serviceCardDivider} />
@@ -98,11 +98,11 @@ export default function LandingPage() {
             <h2 className="text-center text-4xl sm:text-5xl font-extrabold text-[#1f4db8] tracking-tight mb-14">
               Services Packages
             </h2>
-            <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
+            <div className="mx-auto grid max-w-6xl gap-5 sm:gap-8 sm:grid-cols-3">
               {packages.map((item) => (
                 <article
                   key={item}
-                  className="min-h-96 rounded-2xl border border-[#dbe4f8] bg-white p-10 shadow-[0_12px_40px_rgba(15,29,137,0.10)] flex flex-col"
+                  className="min-h-48 sm:min-h-96 rounded-2xl border border-[#dbe4f8] bg-white p-6 sm:p-10 shadow-[0_12px_40px_rgba(15,29,137,0.10)] flex flex-col"
                 >
                   <h3 className="text-xl font-semibold text-[#0f1d89]">{item}</h3>
                   <p className="mt-4 text-sm leading-6 text-[#4a5475]">
@@ -114,9 +114,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="bg-linear-to-r from-[#2f34d0] to-[#282ac0] py-28">
+        <section className="bg-linear-to-r from-[#2f34d0] to-[#282ac0] py-16 sm:py-28">
           <div className="mx-auto w-full max-w-4xl px-6 text-center sm:px-8 lg:px-12">
-            <h2 className="text-4xl font-bold text-white sm:text-5xl leading-tight">
+            <h2 className="text-3xl font-bold text-white sm:text-5xl leading-tight">
               Ready to Transform Your Vision?
             </h2>
             <p className="mt-5 text-base text-white/90">

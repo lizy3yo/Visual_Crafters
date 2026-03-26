@@ -233,8 +233,8 @@ export default function ClientRequestsPage() {
       </div>
 
       <div className="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-3">
-          <div className="mb-3 flex items-center gap-3">
+        <div className="px-3 sm:px-5 py-3">
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
             {(['all','Pending','In Progress','Completed','Cancelled'] as const).map(s => (
               <button key={s}
                 onClick={() => setStatusFilter(s as any)}
@@ -244,7 +244,45 @@ export default function ClientRequestsPage() {
             ))}
           </div>
         </div>
-        <div className="overflow-x-auto">
+        {/* ── Mobile card list (< sm) ── */}
+        <div className="sm:hidden divide-y divide-gray-100">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-4 py-3 animate-pulse space-y-2">
+                <div className="h-3.5 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 rounded w-2/3" />
+              </div>
+            ))
+          ) : requests
+            .slice()
+            .filter(r => statusFilter === 'all' ? true : r.status === statusFilter)
+            .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+            .map(row => (
+              <div key={row._id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-800 truncate">{row.fullName}</p>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">{row.service}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{row.deadline}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_STYLES[row.status]}`}>
+                    {row.status}
+                  </span>
+                  <button
+                    aria-label="View request"
+                    onClick={() => setSelected(row)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                  >
+                    <Eye size={15} />
+                  </button>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        {/* ── Desktop table (≥ sm) ── */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">

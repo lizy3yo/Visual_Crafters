@@ -434,26 +434,26 @@ export default function TransactionsPage() {
         </button>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {/* Summary cards — 3-up on all sizes, tighter padding on mobile */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {SUMMARY_CARDS.map(({ label, value, change }) => (
-          <div key={label} className="rounded-xl bg-white border border-gray-200 shadow-sm p-5 flex flex-col gap-4">
+          <div key={label} className="rounded-xl bg-white border border-gray-200 shadow-sm p-3 sm:p-5 flex flex-col gap-3 sm:gap-4">
             <div className="flex items-center justify-between">
-              <div className="rounded-lg p-2.5 bg-sky-100 text-sky-600">
-                <DollarSign size={18} />
+              <div className="rounded-lg p-1.5 sm:p-2.5 bg-sky-100 text-sky-600">
+                <DollarSign size={15} className="sm:w-[18px] sm:h-[18px]" />
               </div>
               {change && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full">
-                  <TrendingUp size={11} />
+                <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-600 px-1.5 sm:px-2 py-0.5 rounded-full">
+                  <TrendingUp size={10} />
                   {change}
                 </span>
               )}
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-base sm:text-2xl font-bold text-gray-900">
                 {loading ? '—' : formatAmt(value)}
               </p>
-              <p className="mt-0.5 text-xs text-gray-500">{label}</p>
+              <p className="mt-0.5 text-[10px] sm:text-xs text-gray-500 leading-tight">{label}</p>
             </div>
           </div>
         ))}
@@ -473,15 +473,58 @@ export default function TransactionsPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        {/* ── Mobile card list (< sm) ── */}
+        <div className="sm:hidden divide-y divide-gray-100">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-4 py-3 animate-pulse space-y-1.5">
+                <div className="h-3.5 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 rounded w-1/3" />
+              </div>
+            ))
+          ) : transactions.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-gray-400">
+              No transactions yet. Tap <strong>Add Transaction</strong> to get started.
+            </p>
+          ) : transactions.map(row => (
+            <div key={row._id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-800 truncate">{row.client}</p>
+                <p className="text-xs text-gray-500 truncate mt-0.5">{row.service}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${PAYMENT_STYLES[row.payment]}`}>
+                    {row.payment === 'QR' ? <QrCode size={9} /> : <Banknote size={9} />}
+                    {row.payment}
+                  </span>
+                  <span className="text-[10px] text-gray-400">{formatDate(row.date)}</span>
+                </div>
+              </div>
+              <div className="shrink-0 flex flex-col items-end gap-2">
+                <p className="text-sm font-semibold text-sky-600">{formatAmt(row.amount)}</p>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => openEdit(row)} title="Edit"
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-sky-600 hover:bg-sky-50 transition-colors">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => handleDelete(row)} title="Delete"
+                    disabled={deletingId === row._id}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50">
+                    {deletingId === row._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Desktop table (≥ sm) ── */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
                 {COLUMNS.map((col, i) => (
-                  <th
-                    key={i}
-                    className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400 whitespace-nowrap last:w-16"
-                  >
+                  <th key={i}
+                    className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400 whitespace-nowrap last:w-16">
                     {col}
                   </th>
                 ))}
@@ -499,7 +542,6 @@ export default function TransactionsPage() {
                   </tr>
                 ))
               )}
-
               {!loading && transactions.length === 0 && (
                 <tr>
                   <td colSpan={COLUMNS.length} className="px-5 py-12 text-center text-sm text-gray-400">
@@ -507,7 +549,6 @@ export default function TransactionsPage() {
                   </td>
                 </tr>
               )}
-
               {!loading && transactions.map(row => (
                 <tr key={row._id} className="hover:bg-gray-50 transition-colors group">
                   <td className="px-5 py-4 font-medium text-gray-800 whitespace-nowrap">{row.client}</td>
@@ -519,30 +560,18 @@ export default function TransactionsPage() {
                       {row.payment}
                     </span>
                   </td>
-                  <td className="px-5 py-4 whitespace-nowrap font-semibold text-sky-600">
-                    {formatAmt(row.amount)}
-                  </td>
+                  <td className="px-5 py-4 whitespace-nowrap font-semibold text-sky-600">{formatAmt(row.amount)}</td>
                   <td className="px-5 py-4 text-gray-500 whitespace-nowrap">{formatDate(row.date)}</td>
-
-                  {/* Row actions */}
                   <td className="px-5 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => openEdit(row)}
-                        title="Edit"
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-sky-600 hover:bg-sky-50 transition-colors"
-                      >
+                      <button onClick={() => openEdit(row)} title="Edit"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-sky-600 hover:bg-sky-50 transition-colors">
                         <Pencil size={13} />
                       </button>
-                      <button
-                        onClick={() => handleDelete(row)}
-                        title="Delete"
+                      <button onClick={() => handleDelete(row)} title="Delete"
                         disabled={deletingId === row._id}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
-                      >
-                        {deletingId === row._id
-                          ? <Loader2 size={13} className="animate-spin" />
-                          : <Trash2 size={13} />}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50">
+                        {deletingId === row._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                       </button>
                     </div>
                   </td>

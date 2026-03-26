@@ -108,12 +108,18 @@
 .serviceCard {
   background: #ffffff;
   border-radius: 24px;
-  padding: 4rem 2.5rem 3.5rem;
+  padding: 2rem 1.5rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-shadow: 0 8px 32px rgba(15, 29, 137, 0.18);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .serviceCard {
+    padding: 4rem 2.5rem 3.5rem;
+  }
 }
 
 .serviceCard:hover {
@@ -125,8 +131,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 16rem;
+  height: 9rem;
   width: 100%;
+}
+
+@media (min-width: 640px) {
+  .serviceCardIcon {
+    height: 16rem;
+  }
 }
 
 /* Gradient divider line matching the reference */

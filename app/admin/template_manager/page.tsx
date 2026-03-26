@@ -393,12 +393,12 @@ export default function TemplateManagerPage() {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {['all', ...categories].map(cat => (
           <button
             key={cat}
             onClick={() => handleFilterChange(cat)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors border ${
               activeFilter === cat
                 ? 'bg-sky-500 text-white border-sky-500'
                 : 'bg-white text-gray-600 border-gray-200 hover:border-sky-300 hover:text-sky-600'

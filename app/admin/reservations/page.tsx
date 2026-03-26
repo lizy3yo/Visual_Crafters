@@ -834,7 +834,7 @@ export default function ReservationsPage() {
             </div>
           ) : (
             <div>
-              <div className="mb-3 flex items-center gap-3">
+              <div className="mb-3 flex items-center gap-2 flex-wrap">
                 {(['all','Pending','In Progress','Completed','Cancelled'] as const).map(s => (
                   <button key={s}
                     onClick={() => setStatusFilter(s as any)}
@@ -844,7 +844,36 @@ export default function ReservationsPage() {
                 ))}
               </div>
               <div className="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+
+                {/* Mobile card list */}
+                <div className="sm:hidden divide-y divide-gray-100">
+                  {clientRequests.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 py-12">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100">
+                        <InboxIcon size={22} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">No requests yet</p>
+                    </div>
+                  ) : clientRequests
+                    .slice()
+                    .filter(r => statusFilter === 'all' ? true : r.status === statusFilter)
+                    .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+                    .map(row => (
+                      <div key={row._id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                        onClick={() => setSelectedRequest(row)} role="button">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-800 truncate">{row.fullName}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{row.service}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{row.deadline}</p>
+                        </div>
+                        <StatusBadge status={row.status} />
+                      </div>
+                    ))
+                  }
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-100 bg-gray-50">
@@ -880,14 +909,14 @@ export default function ReservationsPage() {
                               <td className="px-5 py-4 whitespace-nowrap">
                                 <StatusBadge status={row.status} />
                               </td>
-                              
                             </tr>
                         ))
                       )}
                     </tbody>
                   </table>
                 </div>
-                <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+
+                <div className="px-4 sm:px-5 py-3 border-t border-gray-100 bg-gray-50">
                   <p className="text-xs text-gray-400">{clientRequests.filter(r => statusFilter === 'all' ? true : r.status === statusFilter).length} request{clientRequests.filter(r => statusFilter === 'all' ? true : r.status === statusFilter).length !== 1 ? 's' : ''}</p>
                 </div>
               </div>
