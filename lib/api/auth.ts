@@ -29,7 +29,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 export async function loginUser(credentials: LoginFormData): Promise<AuthResponse> {
   return apiRequest<AuthResponse>('/api/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email: credentials.email, password: credentials.password }),
+    body: JSON.stringify({ email: credentials.email, password: credentials.password, remember: credentials.remember ?? false }),
   });
 }
 

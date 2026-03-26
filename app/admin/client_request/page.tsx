@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Eye, Clock, X, FileText } from 'lucide-react';
+import { Eye, Clock, X, FileText, InboxIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmModal';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ClientRequest {
@@ -143,16 +144,23 @@ function ViewModal({ request, onClose, onStatusChange }: {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function ClientRequestsPage() {
-  const { toast } = useToast();
+  const { toast }   = useToast();
+  const { confirm } = useConfirm();
   const [requests, setRequests] = useState<ClientRequest[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [selected, setSelected] = useState<ClientRequest | null>(null);
+  const [statusFilter, setStatusFilter] = useState('all' as 'all' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled');
 
   const fetchRequests = useCallback(async () => {
     try {
       const res  = await fetch('/api/client-requests', { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (res.ok) setRequests(data.requests ?? []);
+      else toast(data.error ?? 'Failed to load requests.', 'error');
     } catch {
       toast('Failed to load requests.', 'error');
     } finally {
@@ -184,6 +192,14 @@ export default function ClientRequestsPage() {
   }, [fetchRequests, toast]);
 
   async function handleStatusChange(id: string, status: string) {
+    const ok = await confirm({
+      title:        `Set status to "${status}"?`,
+      description:  'This will update the request status and notify the team.',
+      confirmLabel: 'Update',
+      danger:       status === 'Cancelled',
+    });
+    if (!ok) return;
+
     try {
       const res  = await fetch('/api/client-requests', {
         method:      'PATCH',
@@ -192,7 +208,17 @@ export default function ClientRequestsPage() {
         body:        JSON.stringify({ id, status }),
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) { toast(data.error ?? 'Failed to update status.', 'error'); return; }
+
+      // Update state immediately from response — don't wait for SSE
+      const updated: ClientRequest = data.request;
+      setRequests(prev => prev.map(x => x._id === updated._id ? updated : x));
+      setSelected(prev => prev?._id === updated._id ? updated : prev);
+
       toast(`Status updated to "${status}".`, 'success');
     } catch {
       toast('Something went wrong.', 'error');
@@ -207,7 +233,56 @@ export default function ClientRequestsPage() {
       </div>
 
       <div className="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="px-3 sm:px-5 py-3">
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
+            {(['all','Pending','In Progress','Completed','Cancelled'] as const).map(s => (
+              <button key={s}
+                onClick={() => setStatusFilter(s as any)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${statusFilter === s ? 'bg-sky-500 text-white' : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'}`}>
+                {s === 'all' ? 'All' : s}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* ── Mobile card list (< sm) ── */}
+        <div className="sm:hidden divide-y divide-gray-100">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="px-4 py-3 animate-pulse space-y-2">
+                <div className="h-3.5 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 rounded w-2/3" />
+              </div>
+            ))
+          ) : requests
+            .slice()
+            .filter(r => statusFilter === 'all' ? true : r.status === statusFilter)
+            .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+            .map(row => (
+              <div key={row._id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-800 truncate">{row.fullName}</p>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">{row.service}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{row.deadline}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_STYLES[row.status]}`}>
+                    {row.status}
+                  </span>
+                  <button
+                    aria-label="View request"
+                    onClick={() => setSelected(row)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                  >
+                    <Eye size={15} />
+                  </button>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        {/* ── Desktop table (≥ sm) ── */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
@@ -231,12 +306,22 @@ export default function ClientRequestsPage() {
                 ))
               ) : requests.length === 0 ? (
                 <tr>
-                  <td colSpan={COLUMNS.length} className="px-5 py-12 text-center text-sm text-gray-400">
-                    No requests yet.
+                  <td colSpan={COLUMNS.length} className="px-5 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100">
+                        <InboxIcon size={22} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">No requests yet</p>
+                      <p className="text-xs text-gray-400">Client requests will appear here once submitted.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                requests.map(row => (
+                requests
+                  .slice()
+                  .filter(r => statusFilter === 'all' ? true : r.status === statusFilter)
+                  .sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf())
+                  .map(row => (
                   <tr key={row._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4 font-medium text-gray-800 whitespace-nowrap">{row.fullName}</td>
                     <td className="px-5 py-4 text-gray-600 whitespace-nowrap">{row.service}</td>

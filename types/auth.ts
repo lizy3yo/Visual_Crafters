@@ -5,6 +5,7 @@ export interface LoginFormData {
   email: string;
   password: string;
   role?: UserRole;
+  remember?: boolean;
 }
 
 export interface RegisterFormData {

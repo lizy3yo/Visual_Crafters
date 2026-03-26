@@ -16,7 +16,7 @@ const services = [
 export default function BrandFooter() {
   return (
     <footer className="bg-[#0b162a] text-slate-300">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-10 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
           <div className="flex items-center gap-3">
             <img

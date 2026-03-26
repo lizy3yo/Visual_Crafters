@@ -1,17 +1,46 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginFormData, FormState } from '@/types/auth';
 import { loginUser, AuthApiError } from '@/lib/api/auth';
+import { useToast } from '@/components/ui/Toast';
 
 export default function LoginForm() {
   const router = useRouter();
 
+  const LS_KEY = 'vc:remembered_credentials_v1';
+
   const [formData, setFormData] = useState<Omit<LoginFormData, 'role'>>({
     email: '',
     password: '',
+    remember: false,
   });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.email && parsed?.password) {
+        setFormData({ email: parsed.email, password: parsed.password, remember: true });
+      }
+    } catch (_) {}
+  }, []);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('vc:post_logout_message');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.message) {
+        toast(parsed.message, parsed.type ?? 'info');
+        sessionStorage.removeItem('vc:post_logout_message');
+      }
+    } catch (_) {}
+  }, [toast]);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -22,7 +51,8 @@ export default function LoginForm() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, type } = e.target as HTMLInputElement;
+    const value = type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formState.error) {
       setFormState((prev) => ({ ...prev, error: null }));
@@ -40,7 +70,21 @@ export default function LoginForm() {
 
       setFormState({ isLoading: false, error: null, success: true });
 
+      // Persist credentials locally if requested (note: storing passwords in localStorage
+      // is convenient but not as secure as using the browser password manager or a
+      // server-side persistent session). Implemented per request for autofill behavior.
+      try {
+        if (formData.remember) {
+          localStorage.setItem(LS_KEY, JSON.stringify({ email: formData.email, password: formData.password }));
+        } else {
+          localStorage.removeItem(LS_KEY);
+        }
+      } catch (_) {}
+
       const redirectPath = response.user.role === 'admin' ? '/admin' : '/student';
+      try {
+        sessionStorage.setItem('vc:post_login_message', JSON.stringify({ message: 'Signed in successfully.', type: 'success' }));
+      } catch (_) {}
       router.push(redirectPath);
     } catch (error) {
       setFormState({
@@ -109,6 +153,22 @@ export default function LoginForm() {
           </button>
         </div>
       </div>
+
+        {/* Remember me */}
+        <div className="flex items-center justify-between">
+          <label htmlFor="remember" className="inline-flex items-center text-sm text-[#4a5475]">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              checked={!!formData.remember}
+              onChange={handleChange}
+              disabled={formState.isLoading}
+              className="h-4 w-4 rounded border-[#dbe4f8] bg-white text-sky-600 focus:ring-sky-500"
+            />
+            <span className="ml-2">Remember me</span>
+          </label>
+        </div>
 
       {/* Error */}
       {formState.error && (

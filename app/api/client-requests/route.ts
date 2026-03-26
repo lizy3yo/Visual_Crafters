@@ -3,10 +3,13 @@ import { connectDB } from '@/lib/mongodb';
 import ClientRequest from '@/lib/models/ClientRequest';
 import { authenticate, authorizeRole } from '@/lib/auth/middleware';
 import { broadcast } from '@/lib/sse/clientRequestBroadcaster';
+import { broadcast as broadcastDashboard } from '@/lib/sse/dashboardBroadcaster';
+import { redis, isUpstash } from '@/lib/rateLimit/redis';
 import { uploadImage } from '@/lib/cloudinary';
 import { rateLimit } from '@/lib/rateLimit/middleware';
 import { sendEmail } from '@/lib/email/nodemailer';
 import { getRequestConfirmationTemplate } from '@/lib/email/templates/requestConfirmation';
+import { getRequestStatusUpdateTemplate } from '@/lib/email/templates/requestStatusUpdate';
 
 // ── Validation helpers ────────────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -61,6 +64,11 @@ export async function POST(req: NextRequest) {
     });
 
     broadcast('request:created', doc);
+    // Invalidate dashboard cache so stats update immediately
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
+    broadcastDashboard('dashboard:refresh', { reason: 'request:created' });
+
+    // Auto-creation of reservations was removed: client requests remain separate
 
     // Send confirmation email (non-blocking — don't fail the request if email fails)
     const referenceNumber = String(doc._id).slice(-8).toUpperCase();
@@ -100,7 +108,33 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status');
     const query  = status && status !== 'all' ? { status } : {};
 
+    const cacheKey = status && status !== 'all' ? `client-requests:status:${status}` : 'client-requests:all';
+
+    // Try Redis cache first
+    try {
+      const cached = await redis.get?.(cacheKey) ?? null;
+      if (cached) {
+        const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached;
+        const res = NextResponse.json({ requests: parsed });
+        res.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
+        return res;
+      }
+    } catch (e) {
+      console.error('[ClientRequest GET] Redis read error', e);
+    }
+
     const requests = await ClientRequest.find(query).sort({ createdAt: -1 }).lean();
+
+    // Populate cache (short TTL)
+    try {
+      if (isUpstash()) {
+        await (redis as any).set(cacheKey, JSON.stringify(requests), { ex: 15 });
+      } else {
+        await (redis as any).set(cacheKey, JSON.stringify(requests), 'EX', 15);
+      }
+    } catch (e) {
+      console.error('[ClientRequest GET] Redis write error', e);
+    }
 
     const res = NextResponse.json({ requests });
     res.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=30');
@@ -128,6 +162,26 @@ export async function PATCH(req: NextRequest) {
     if (!doc) return NextResponse.json({ error: 'Request not found.' }, { status: 404 });
 
     broadcast('request:updated', doc);
+    // Invalidate dashboard cache so stats update immediately
+    try { await (redis as any).del('dashboard:stats'); } catch { /* ignore */ }
+    broadcastDashboard('dashboard:refresh', { reason: 'request:updated' });
+
+    // Send status notification email (non-blocking)
+    const notifyStatuses = ['In Progress', 'Completed', 'Cancelled'] as const;
+    if (notifyStatuses.includes(status as any)) {
+      const referenceNumber = String(doc._id).slice(-8).toUpperCase();
+      const { html, text, subject } = getRequestStatusUpdateTemplate({
+        fullName:       (doc as any).fullName,
+        service:        (doc as any).service,
+        templateTitle:  (doc as any).templateTitle,
+        deadline:       (doc as any).deadline,
+        referenceNumber,
+        status: status as 'In Progress' | 'Completed' | 'Cancelled',
+      });
+      sendEmail((doc as any).email, subject, html, text)
+        .catch(err => console.error('[StatusUpdate email]', err));
+    }
+
     return NextResponse.json({ request: doc });
   } catch (err: any) {
     console.error('[ClientRequest PATCH]', err);

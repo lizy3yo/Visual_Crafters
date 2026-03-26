@@ -130,12 +130,11 @@ export default function TemplatesPage() {
   const [categories, setCategories]   = useState<string[]>([]);
   const [activeFilter, setFilter]     = useState('all');
   const [search, setSearch]           = useState('');
-  const [loading, setLoading]         = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const [buyTarget, setBuyTarget]     = useState<Template | null>(null);
   const searchTimeout                 = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchTemplates = useCallback(async (category = 'all', q = '') => {
-    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (category !== 'all') params.set('category', category);
@@ -146,14 +145,13 @@ export default function TemplatesPage() {
       if (res.ok) {
         const list: Template[] = data.templates ?? [];
         setTemplates(list);
-        // derive categories from full list only on initial load
         if (category === 'all' && !q) {
           const cats = Array.from(new Set(list.map(t => t.category))).sort();
           setCategories(cats);
         }
       }
     } catch { /* silent */ } finally {
-      setLoading(false);
+      setInitializing(false);
     }
   }, []);
 
@@ -246,12 +244,12 @@ export default function TemplatesPage() {
             </div>
 
             {/* Category filters */}
-            <div className="flex flex-wrap justify-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1 scrollbar-none">
               {['all', ...categories].map(cat => (
                 <button
                   key={cat}
                   onClick={() => handleFilter(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
                     activeFilter === cat
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
@@ -266,7 +264,7 @@ export default function TemplatesPage() {
 
         {/* Grid */}
         <div className="pb-16">
-          {loading ? (
+          {initializing ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
