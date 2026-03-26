@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef, useState, useCallback, ChangeEvent } from 'react';
 import Image from 'next/image';
@@ -293,6 +293,10 @@ export default function TemplateManagerPage() {
       const qs   = category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
       const res  = await fetch(`/api/admin/templates${qs}`, { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (res.ok) setTemplates(data.templates ?? []);
       else toast(data.error ?? 'Failed to load templates.', 'error');
     } catch {

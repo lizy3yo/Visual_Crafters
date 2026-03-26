@@ -168,6 +168,10 @@ function TransactionModal({ initial, onClose, onSaved }: ModalProps) {
         body: JSON.stringify({ ...form, amount: Number(form.amount) }),
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong.');
       toast(initial ? 'Transaction updated.' : 'Transaction added.', 'success');
       onSaved(data.transaction);
@@ -327,12 +331,16 @@ export default function TransactionsPage() {
     try {
       const res  = await fetch('/api/admin/transactions', { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? 'Failed to load.');
       dispatch({ type: 'FETCH_OK', transactions: data.transactions, summary: data.summary });
     } catch (err: any) {
       dispatch({ type: 'FETCH_ERR', error: err.message });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -385,6 +393,10 @@ export default function TransactionsPage() {
         credentials: 'include',
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? 'Failed to delete.');
       dispatch({ type: 'REMOVE', id: t._id });
       toast('Transaction deleted.', 'success');

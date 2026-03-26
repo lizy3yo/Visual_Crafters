@@ -155,7 +155,12 @@ export default function ClientRequestsPage() {
     try {
       const res  = await fetch('/api/client-requests', { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (res.ok) setRequests(data.requests ?? []);
+      else toast(data.error ?? 'Failed to load requests.', 'error');
     } catch {
       toast('Failed to load requests.', 'error');
     } finally {
@@ -203,6 +208,10 @@ export default function ClientRequestsPage() {
         body:        JSON.stringify({ id, status }),
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) { toast(data.error ?? 'Failed to update status.', 'error'); return; }
 
       // Update state immediately from response — don't wait for SSE

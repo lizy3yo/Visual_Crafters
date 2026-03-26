@@ -184,6 +184,7 @@ function AddModal({ selectedDate, onClose, onSaved, initial }: {
         body: JSON.stringify(form),
       });
       const data = await res.json();
+      if (res.status === 401) { toast('Your session has expired. Please log in again.', 'error'); return; }
       if (!res.ok) { toast(data.error ?? 'Failed to save.', 'error'); return; }
       toast('Reservation added.', 'success');
       onSaved(data.reservation);
@@ -557,10 +558,16 @@ export default function ReservationsPage() {
 
       const res  = await fetch('/api/admin/reservations', { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (res.ok) {
         setReservations(data.reservations ?? []);
         setActiveDates(data.dates ?? []);
         try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), payload: data })); } catch {}
+      } else {
+        toast(data.error ?? 'Failed to load reservations.', 'error');
       }
     } catch { toast('Failed to load reservations.', 'error'); }
     finally { setLoading(false); }
@@ -619,6 +626,10 @@ export default function ReservationsPage() {
 
         const res = await fetch('/api/client-requests', { credentials: 'include' });
         const data = await res.json();
+        if (res.status === 401) {
+          toast('Your session has expired. Please log in again.', 'error');
+          return;
+        }
         if (res.ok) {
           setClientRequests(data.requests ?? []);
           try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), payload: { requests: data.requests ?? [] } })); } catch {}
@@ -626,6 +637,8 @@ export default function ReservationsPage() {
             .map((r: any) => { try { return toYMD(new Date(r.deadline)); } catch { return null; } })
             .filter(Boolean);
           setActiveDates(prev => Array.from(new Set([...prev, ...deadlines])));
+        } else {
+          toast(data.error ?? 'Failed to load client requests.', 'error');
         }
       } catch (e) { toast('Failed to load client requests.', 'error'); }
       finally { setRequestsLoading(false); }
@@ -672,6 +685,10 @@ export default function ReservationsPage() {
         body: JSON.stringify({ id, status }),
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) { toast(data.error ?? 'Failed to update.', 'error'); return; }
       const updated = data.request;
       setClientRequests(prev => prev.map(x => x._id === updated._id ? updated : x));
@@ -701,6 +718,10 @@ export default function ReservationsPage() {
         body: JSON.stringify({ id, status }),
       });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) { toast(data.error ?? 'Failed to update.', 'error'); return; }
       const updated: Reservation = data.reservation;
       setReservations(prev => prev.map(x => x._id === updated._id ? updated : x));
@@ -720,6 +741,10 @@ export default function ReservationsPage() {
     try {
       const res = await fetch(`/api/admin/reservations?id=${id}`, { method: 'DELETE', credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) { toast(data.error ?? 'Failed to delete.', 'error'); return; }
       setReservations(prev => prev.filter(x => x._id !== id));
       toast('Reservation removed.', 'success');

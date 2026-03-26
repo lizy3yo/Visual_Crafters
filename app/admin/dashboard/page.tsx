@@ -157,12 +157,16 @@ export default function AdminDashboard() {
     try {
       const res  = await fetch('/api/admin/dashboard', { credentials: 'include' });
       const data = await res.json();
+      if (res.status === 401) {
+        toast('Your session has expired. Please log in again.', 'error');
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? 'Failed to load dashboard.');
       dispatch({ type: 'FETCH_OK', data });
     } catch (err: any) {
       dispatch({ type: 'FETCH_ERR', error: err.message });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
