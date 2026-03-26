@@ -30,7 +30,7 @@ export default function BrandHeader() {
                 className="h-9 w-9 object-contain"
                 priority
               />
-              <span className="text-sm font-semibold tracking-wide text-[#0f1d89] hidden sm:inline-block">
+              <span className="text-lg font-semibold tracking-wide text-[#0f1d89] hidden sm:inline-block">
                 Visual Crafter Solutions
               </span>
             </Link>
