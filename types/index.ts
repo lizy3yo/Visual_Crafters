@@ -100,3 +100,19 @@ export interface EmailResult {
     message?: string;
     error?: string;
 }
+
+// ── Transaction ───────────────────────────────────────────────────────────────
+export type PaymentMethod = 'QR' | 'Cash';
+
+export interface ITransaction {
+  _id:        string;
+  client:     string;
+  service:    string;
+  template:   string;
+  payment:    PaymentMethod;
+  amount:     number;
+  date:       string; // ISO date string YYYY-MM-DD
+  notes?:     string;
+  createdAt:  string;
+  updatedAt:  string;
+}
